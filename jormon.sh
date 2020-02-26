@@ -25,7 +25,7 @@ REST_HOST="127.0.0.1"
 REST_PORT="3100"
 REST_URI="api"
 SYSTEMCTL_DAEMON_NAME="jormungandr.service"
-
+JCLI=/opt/jormungandr/jcli
 ## END OF CONFIGURATION PARAMETERS
 
 
@@ -35,7 +35,7 @@ BOOTSTRAP_TIME=$SECONDS
 
 while true; do
 
-    LAST_BLOCK=$(jcli rest v0 node stats get --output-format json --host $REST_API 2> /dev/null)
+    LAST_BLOCK=$($JCLI rest v0 node stats get --output-format json --host $REST_API 2> /dev/null)
     LAST_BLOCK_HEIGHT=$(echo $LAST_BLOCK | jq -r .lastBlockHeight)
     LAST_BLOCK_DATE=$(echo $LAST_BLOCK | jq -r .lastBlockTime)
     UPTIME=$(echo $LAST_BLOCK | jq -r .uptime)
@@ -45,7 +45,7 @@ while true; do
         DIFF_SECONDS=$((CURRENT_TIME - LAST_BLOCK_TIME))
         if ((DIFF_SECONDS > SYNC_TOLERANCE_SECONDS)); then
             echo "Jormungandr out-of-sync. Time difference of $DIFF_SECONDS seconds. Shutting down node with uptime $UPTIME..."
-            jcli rest v0 shutdown get --host $REST_API
+            $JCLI rest v0 shutdown get --host $REST_API
             BOOTSTRAP_TIME=$SECONDS
             DIFF_SECONDS=0
         else
